@@ -1,0 +1,5 @@
+{
+  "DEFAULT" : 0,
+  "ADMIN_COMPANY": 1,
+  "ADMIN_SYSTEM": 2
+}
