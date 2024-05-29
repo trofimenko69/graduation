@@ -7,8 +7,6 @@ const router=new Router()
 
 router.use(verify.general)
 
-router.route('/').get(asyncRoute(userCtrl.getAll))
 
 router.route('/self').get(asyncRoute(userCtrl.self))
 
-router.route('/:userId').get(asyncRoute(userCtrl.update))

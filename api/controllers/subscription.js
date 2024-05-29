@@ -2,7 +2,7 @@ import { AppErrorMissing, AppErrorNotExist} from "../utils/errors.js";
 import Subscription from "../models/subscription.js";
 import Agreement from "../models/agreement.js";
 import Company from "../models/company.js";
-
+import History from "../models/history.js";
 
 export default {
     async design({ body: {
@@ -30,7 +30,6 @@ export default {
 
         let agreement ;
         if(!checkAgreement){
-            if(!user.passport) throw new AppErrorMissing('passport')
             agreement=await Agreement.create({
                 companyId: company.id,
                 userId: user.id
@@ -48,6 +47,10 @@ export default {
             agreementId: checkAgreement? checkAgreement.id : agreement.id
         })
 
+        await History.create({
+            type: 'assign',
+            date: new Date(),
+        })
         await Agreement.update({
             subscriptionId: subscription.id,
         },

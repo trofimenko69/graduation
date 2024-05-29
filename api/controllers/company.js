@@ -1,5 +1,5 @@
 import Company from "../models/company.js";
-import {AppErrorAlreadyExists, AppErrorMissing, AppErrorNotExist} from "../utils/errors.js";
+import {AppErrorAlreadyExists, AppErrorInvalid, AppErrorMissing, AppErrorNotExist} from "../utils/errors.js";
 import randomPassword from '../utils/generate.js';
 import sandEmail from '../service/email.js'
 
@@ -11,8 +11,18 @@ import {Op} from "sequelize";
 import argon2 from "argon2";
 import Mark from "../models/mark.js";
 import Workout from "../models/workout.js";
+import jwt from "../utils/jwt.js";
 
 export default {
+
+    async login({body: {login, password} },res){
+        const company=await Company.findOne({
+            where: { login }
+        })
+        if(!await company.validatePassword(password)) throw new AppErrorInvalid('password')
+        const { jwt: token } = jwt.generate({ id: company.id });
+        res.json({user: company, token})
+    },
 
     async get({ query, user }, res){
         const {
@@ -31,7 +41,7 @@ export default {
             order: ['name'],
             ...(search && {
                 where: {
-                    [Op.or]: [{ name: { [Op.iLike]: `%${search}%` } }, { shortName: { [Op.iLike]: `%${search}%` } }],
+                    [Op.or]: [{ name: { [Op.iLike]: `%${search}%` } }, { name: { [Op.iLike]: `%${search}%` } }],
                 },
             }),
            ...(coast && { where: { [Op.between]: [0, coast]} }),
@@ -43,7 +53,7 @@ export default {
         const filtersArea = []
 
         filtersSize.push(...[...new Set(companies.map(c=>c.size))].filter(Boolean))
-        filtersArea.push(...[...new Set(companies.map(c=>c.size))].filter(Boolean))
+        filtersArea.push(...[...new Set(companies.map(c=>c.area))].filter(Boolean))
 
         res.json({
             companies: companies,
@@ -55,16 +65,12 @@ export default {
         })
     },
 
-    async self({params: {companyId}, user}, res) {
-        const company = await Company.findByPk(companyId, {
-            include: {
-                model: Coach,
-                as: 'coaches',
-                required: false,
+    async self({ company }, res) {
+         company.coaches = await Coach.findAll({
+            where:{
+                companyId: company.id
             }
         });
-        if (!company) throw new AppErrorNotExist('company');
-
         res.json({company: prepareCompany(company)})
     },
 
@@ -161,45 +167,6 @@ export default {
         res.json({ status: 'OK' });
     },
 
-   async appendCoach({body: {fio, experience, directions, description, leisurePlaces,phone}, company}, res){
-
-        if(!fio) throw new AppErrorMissing('fio')
-        if(!experience) throw new AppErrorMissing('experience')
-        if(!directions) throw new AppErrorMissing('directions')
-        if(!description) throw new AppErrorMissing('description')
-        if(!phone) throw new AppErrorMissing('phone')
-
-        await Coach.create({
-            fio,
-            experience,
-            directions,
-            description,
-            phone,
-            companyId: company.id
-        })
-
-       res.json({status: 'Ok'})
-
-   },
-
-   async updateCoach({ params: { coachId }, body: {fio, experience, directions, description, leisurePlaces,phone} }, res) {
-       if(!fio) throw new AppErrorMissing('fio')
-       if(!experience) throw new AppErrorMissing('experience')
-       if(!directions) throw new AppErrorMissing('directions')
-       if(!description) throw new AppErrorMissing('description')
-       if(!phone) throw new AppErrorMissing('phone')
-
-       const coach=await Coach.findByPk(coachId)
-       if(!coach) throw new AppErrorNotExist('coach')
-
-       await coach.update({ fio, experience, directions, description, phone })
-       res.json({status: 'Ok'})
-   },
-
-   async destroyCoach({params: { coachId } },res){
-       await Coach.destroy({ where: { id: coachId } });
-       res.json({ status: 'OK' });
-   },
 
     async createMark({ params: { companyId }, body: { mark, text }, user }, res) {
         if (!mark) throw new AppErrorMissing('mark');
@@ -243,6 +210,29 @@ export default {
 
         res.json(schedule)
 
+    },
+
+    async statistics({params: { companyId }}, res ){
+        const coach=await Coach.count({
+            where: {
+                companyId: companyId
+            }
+        })
+
+        const {count, rows}=await Mark.findAndCountAll({
+            where: {
+                companyId: companyId,
+            }
+        })
+
+        const data = { marks: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }, diagram: {} };
+        for (const c of rows) data.marks[c.mark]++;
+        for (let i = 5; i > 0; i--) data.diagram[i] = Math.round((data.marks[i] / count) * 100);
+
+        res.json({
+            countCoach: coach,
+            mark: data,
+        })
     }
 
 }

@@ -13,22 +13,15 @@ const atLeastOneDigit = /\d/,
     otherChars = /[^0-9a-zA-Z!@_#$%^&*]/g;
 
 export default  {
-    async registration({body: {login, code , password, fio} }, res ){
+    async registration({body: {login, code} }, res ){
 
         if (!login) throw new AppErrorMissing('email');
         if (!code) throw new AppErrorMissing('code');
-        if(!fio) throw new AppErrorMissing('fio')
-        if(!password) throw new AppErrorMissing('password')
         const user=await User.findOne({where: { login }})
-
-
         if (user?.code !== code || new Date() - user.codeAt > 1000 * 60 * 15) throw new AppErrorInvalid('code');
-
         await user.update({
             isActivate: true
         })
-
-
         res.json({status: 'Ok'})
     },
 

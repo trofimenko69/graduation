@@ -1,7 +1,7 @@
 import path from 'path';
 import multer from 'multer';
 import { AppError, AppErrorMissing } from '../utils/errors.js';
-import errorCodes from '../config/errorCodes.json';
+import errorCodes from '../config/errorCodes.json' assert { type: "json" }
 
 import fs from 'fs';
 

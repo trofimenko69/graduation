@@ -1,5 +1,4 @@
 {
   "DEFAULT" : 0,
-  "ADMIN_COMPANY": 1,
-  "ADMIN_SYSTEM": 2
+  "ADMIN_SYSTEM": 1
 }

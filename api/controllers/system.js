@@ -2,7 +2,7 @@ import Company from "../models/company.js";
 import {AppErrorMissing} from "../utils/errors.js";
 import Mark from "../models/mark.js";
 import User from "../models/user.js";
-import roles from "../config/roles.json"
+import roles from "../config/roles.json" assert { type: "json" };
 
 export default {
     async landing(req, res) {

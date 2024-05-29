@@ -13,13 +13,4 @@ export default {
             user: user
         })
     },
-
-
-
-
-
-
-
-
-
 }

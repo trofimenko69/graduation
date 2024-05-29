@@ -1,5 +1,6 @@
 import {Model, DataTypes} from "sequelize";
 import {v4 as uuidv4} from "uuid";
+import argon2 from "argon2";
 
 
 export default class Company extends Model{
@@ -23,7 +24,7 @@ export default class Company extends Model{
 
                 address: DataTypes.STRING,
                 area: DataTypes.STRING,
-                size: DataTypes.STRING,
+                size: DataTypes.SMALLINT,
 
                 phone: DataTypes.STRING,
                 inn: DataTypes.STRING,
@@ -44,6 +45,8 @@ export default class Company extends Model{
         });
 
     }
-
+    async validatePassword(password) {
+        return await argon2.verify(this.password, password);
+    }
 
 }

@@ -1,4 +1,4 @@
-import errorCodes from '../config/errorCodes.json'  assert { type: "json" };;
+import errorCodes from '../config/errorCodes.json' assert { type: "json" }
 import { toSnakeCase } from 'js-convert-case';
 
 const errorStatuses = {
