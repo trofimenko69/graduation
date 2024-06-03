@@ -1,19 +1,22 @@
 import {DataTypes, Model} from "sequelize";
 import {v4 as uuidv4} from "uuid";
+import types from "../config/types.json";
 
 export default class Subscription extends Model {
     static initialize(sequelize){
         Subscription.init({
 
                 id: {type: DataTypes.UUID, primaryKey: true},
-                numberVisits: {type : DataTypes.SMALLINT, allowNull: false},
-                beginDate: { type: DataTypes.DATE },
-                endDate: {type: DataTypes.DATE, allowNull: true},
+                countVisits: {type : DataTypes.SMALLINT, allowNull: false},
+                timeStart: { type: DataTypes.TIME, allowNull: true },
+                timeEnd: {type: DataTypes.TIME, allowNull: true},
                 coast: { type: DataTypes.SMALLINT },
                 visitingTime: { type: DataTypes.STRING, allowNull: false },
-                
-                isActive: DataTypes.BOOLEAN,
-
+                type: {
+                    type: DataTypes.SMALLINT,
+                    allowNull: false,
+                    validate: { isIn: [Object.values(types)] },
+                },
         },
             {
                 sequelize,

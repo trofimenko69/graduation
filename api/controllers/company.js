@@ -12,6 +12,8 @@ import argon2 from "argon2";
 import Mark from "../models/mark.js";
 import Workout from "../models/workout.js";
 import jwt from "../utils/jwt.js";
+import User from "../models/user.js";
+import Agreement from "../models/agreement.js";
 
 export default {
 
@@ -27,13 +29,13 @@ export default {
     async get({ query, user }, res){
         const {
             search,
-            filters: { coast, size, area },
+            filters: { coast, size, area, address },
         } = prepareParams(query, {
             allowedFilters: {
                 coast: Number,
                 size: v => (Array.isArray(v) ? v.map(Number) : [Number(v)]),
                 area: v => (Array.isArray(v) ? v.map(Number) : [Number(v)]),
-
+                address: str => (Array.isArray(str) ? str : [str]),
             },
         });
 
@@ -45,9 +47,12 @@ export default {
                 },
             }),
            ...(coast && { where: { [Op.between]: [0, coast]} }),
-           ...(size && { where : { size: size }}),
-           ...(area && { where: { area: area }})
+           ...(size && { where : { size:  { [Op.gte]: size }}}),
+           ...(area && { where: { area: area }}),
+           ...(address && {where: { address: {[Op.iLike]: `%${address}%`} }})
         });
+
+       const coaches=await Coach.findAll()
 
         const filtersSize = []
         const filtersArea = []
@@ -61,7 +66,8 @@ export default {
                 size: filtersSize,
                 area: filtersArea,
                 coast:coast
-            }
+            },
+            coaches: coaches,
         })
     },
 
@@ -75,17 +81,24 @@ export default {
     },
 
 
-    async getById({params: {companyId}, user}, res) {
+    async getById({params: { companyId }, user}, res) {
 
         const company = await Company.findByPk(companyId, {
-            include: {
+            include:
+                [{
                 model: Coach,
                 as: 'coaches',
                 required: false,
-            }
+                },
+                {
+                model: Mark,
+                as: 'marks',
+                required: false,
+                }]
         });
         if (!company) throw new AppErrorNotExist('company');
 
+        company.marks.sort((m)=>m.userId === user.id)
         res.json({company: map(company)})
 
     },
@@ -213,25 +226,46 @@ export default {
     },
 
     async statistics({params: { companyId }}, res ){
-        const coach=await Coach.count({
+
+
+        const [{count, rows,coaches, users}]=await Promise.all([
+            Mark.findAndCountAll({
+                where: {
+                    companyId: companyId,
+                }
+            }),
+            Coach.count({
             where: {
                 companyId: companyId
             }
-        })
+        }),
+            User.count({
+                include: {
+                    model: Agreement,
+                    as: 'agreements',
+                    required: true,
+                    include: {
+                        model : Company,
+                        as: 'company',
+                        required: true,
+                        where: {
+                            id: companyId
+                        }
+                    }
+                },
+            })
+        ])
 
-        const {count, rows}=await Mark.findAndCountAll({
-            where: {
-                companyId: companyId,
-            }
-        })
+
 
         const data = { marks: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }, diagram: {} };
         for (const c of rows) data.marks[c.mark]++;
         for (let i = 5; i > 0; i--) data.diagram[i] = Math.round((data.marks[i] / count) * 100);
 
         res.json({
-            countCoach: coach,
+            countCoach: coaches,
             mark: data,
+            usersCount: users
         })
     }
 

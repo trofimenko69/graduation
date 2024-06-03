@@ -16,34 +16,59 @@ const fileFilter = (req, { originalname }, cb) => {
 };
 
 
-const storage = multer.diskStorage({
-    destination: (req, { originalname }, cb) => {
+const storageLogo = multer.diskStorage({
+    destination: ({user, company, }, { originalname }, cb) => {
         const extension = path.extname(originalname).toLowerCase();
-        cb(null, `./uploads/images/`);
+         if(user) cb(null, `./uploads/users/`);
+         else cb(`./uploads/company/logo`)
     },
-    filename: ({ user }, { originalname }, cb) => {
+    filename: ({ user, company }, { originalname }, cb) => {
         const extension = path.extname(originalname).toLowerCase();
-        cb(null, user.id + (extension === '.pdf' ? '.pdf' : '.jpg'));
+        if(user) cb(null, user.id + extension);
+        else cb(null, company.id + extension)
     },
 });
 
 
-const uploader = multer({ storage, fileFilter, limits: { fileSize: 3145728 } }).single('file');
+const storageImages = multer.diskStorage({
+    destination: ({ company }, { originalname }, cb) => {
+        if(company) cb(`./uploads/company/images`)
+    },
+    filename: ({ user, company }, { originalname }, cb) => {
+        const extension = path.extname(originalname).toLowerCase();
+        if(company) cb(null, company.id + extension);
+    },
+})
+
+const uploaderLogo = multer({ storageLogo, fileFilter, limits: { fileSize: 3145728 } }).single('file',  1);
+const uploaderImages = multer({ storageImages, fileFilter, limits: { fileSize: 3145728 } }).array('images', 10);
 
 
 export default {
-    uploader,
+    uploaderLogo,
+    uploaderImages,
 
-    async afterUpload({ file, user }, res) {
+    async afterUploadLogo({ file, user, company, }, res) {
+
         if (!file) throw new AppErrorMissing('file');
-        const extension = path.extname(file.originalname).toLowerCase();
+        if(user) await user.update( { logo: true } );
+        else await company.update({ logo: true} )
 
-        await user.update(extension === '.pdf' ? { summary: true } : { logo: true });
         res.json({ status: 'OK' });
     },
 
-    
+    async afterUploadImages({ images }, res){
 
+        const infoAboutImages=images.map((image, index)=>{
+                return {
+                    id: index,
+                    name: image.fileName,
+                    path: `/${image.path}`,
+                    size: image.size
+                }
+        })
+        res.json({info: infoAboutImages.map(m=>m)})
+    },
     async delete({ user }, res) {
         fs.unlink(`./uploads/summary/${user.id}.pdf`, () => {});
 

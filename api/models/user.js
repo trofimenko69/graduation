@@ -20,7 +20,6 @@ export default class User extends Model {
     isActivate: { type: DataTypes.BOOLEAN, defaultValue: false },
     fio: DataTypes.STRING,
     phone: DataTypes.STRING,
-    passport: {type: DataTypes.BOOLEAN, allowNull: true},
 
     role: {
         type: DataTypes.SMALLINT,
@@ -31,6 +30,7 @@ export default class User extends Model {
 
     logo: DataTypes.BOOLEAN,
 
+    date: DataTypes.DATE,
     code: DataTypes.STRING,
     codeAt: DataTypes.DATE,
 

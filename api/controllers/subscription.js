@@ -1,99 +1,78 @@
-import { AppErrorMissing, AppErrorNotExist} from "../utils/errors.js";
+import {AppErrorInvalid, AppErrorMissing, AppErrorNotExist} from "../utils/errors.js";
 import Subscription from "../models/subscription.js";
 import Agreement from "../models/agreement.js";
 import Company from "../models/company.js";
 import History from "../models/history.js";
+import states from "../config/states.json" assert { type: "json" };
 
 export default {
     async design({ body: {
-        visitingTime,
-        numberVisits,
-        coast,
-        companyId
+        subscriptionId,
+        companyId,
+        coachId
     }, user }, res){
 
-        if(!visitingTime) throw new AppErrorMissing('visitingTime')
-        if(!numberVisits) throw new AppErrorMissing('numberVisits')
-        if(!coast) throw new AppErrorMissing('coast')
+
+        if(!subscriptionId) throw new AppErrorMissing('subscriptionId')
         if (!companyId) throw new AppErrorMissing('companyId');
 
         const company= await Company.findByPk(companyId)
 
         if (!company) throw new AppErrorNotExist('company');
 
-        const checkAgreement= await Agreement.findOne({
-            where: {
-            companyId: company.id,
-            userId: user.id
-            }}
-        )
-
-        let agreement ;
-        if(!checkAgreement){
-            agreement=await Agreement.create({
-                companyId: company.id,
-                userId: user.id
-            })
-        }
-
-       const subscription=await Subscription.create({
-            numberVisits,
-            beginDate: new Date(),
-            endDate:  visitingTime === 'Безлимит' ? new Date(new Date().getDate() + numberVisits) : null,
-            coast,
-            visitingTime,
-            isActive:true,
-            userId: user.id,
-            agreementId: checkAgreement? checkAgreement.id : agreement.id
+        const agreement=await Agreement.create({
+            subscriptionId: subscriptionId,
+            companyId:companyId,
+            coachId: company ?? null,
         })
 
         await History.create({
             type: 'assign',
             date: new Date(),
+            userId: user.id
         })
-        await Agreement.update({
-            subscriptionId: subscription.id,
-        },
-            { where: { id: subscription.agreementId }})
 
-        res.json({ status: 'Ok'})
+
+        res.json({ agreement })
     },
 
     async freeze({params: { subscriptionId }, user }, res){
-        const subscription= await Subscription.findOne({
+        const agreement= await Agreement.findOne({
             where: {
-                id: subscriptionId,
-                userId: user.id,
-                isActive: true,
+                subscriptionId: subscriptionId,
+            },
+            include:{
+                model: Subscription,
+                as: 'subscription',
+                required:true,
             }
         })
 
-        if(!subscription) throw new AppErrorNotExist('subscription')
+        if(!agreement) throw new AppErrorNotExist('subscription')
+
+        if(agreement.status !== states.ACTIVE) throw new AppErrorInvalid('subscription')
 
         if(
-            subscription.visitingTime === 'Безлимит' &&
-            subscription.endDate > new Date()
-        ) {
-            await subscription.update({ isActive: false })
-            return res.json({status: 'Ok'})
-        }
+            (agreement.subscription.visitingTime === 'Безлимит'
+                &&  agreement.createdAt + agreement.subscription.countVisits > new Date())  || agreement.subscription.visitingTime > 0 ) {
+            await agreement.update({ states: states.BLOCKED })
+        } else throw new AppErrorInvalid('subscription')
 
-        if(subscription.numberVisits > 0) await subscription.update({ isActive: false })
         res.json({status: 'Ok'})
     },
 
     async defrost({params: { subscriptionId }, user}, res){
-        const subscription=await Subscription.findOne({
+        const agreement=await Agreement.findOne({
             where: {
-                id: subscriptionId,
+                subscriptionId: subscriptionId,
                 userId: user.id,
-                isActive: false,
+                states: states.BLOCKED,
             }
         })
 
-        if(!subscription) throw new AppErrorNotExist('subscription')
+        if(!agreement) throw new AppErrorNotExist('subscription')
 
-        await subscription.update({ isActive: true });
+        await agreement.update({ states: states.ACTIVE });
         res.json({ status: 'Ok' })
 
     }

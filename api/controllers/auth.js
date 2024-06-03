@@ -25,7 +25,7 @@ export default  {
         res.json({status: 'Ok'})
     },
 
-    async  checkEmail({ body: {login, password, fio} }, res){
+    async  checkEmail({ body: {login, password} }, res){
 
         if(!login || !validate.isEmail(login)) throw new AppErrorInvalid('login')
 
@@ -38,8 +38,8 @@ export default  {
             password.length >= 8 &&
             password.length <= 20;
 
-        if(!password) throw new AppErrorInvalid('password')
-        if(!fio) throw new AppErrorMissing('fio')
+        if(!isValid) throw new AppErrorInvalid('password')
+        if(!password) throw new AppErrorMissing('password')
 
         const user=await User.findOne({
             where: { login }
@@ -47,7 +47,7 @@ export default  {
         if(user) throw new AppErrorAlreadyExists('user')
         const code = generate(6)
         sendEmail(login, 'activateEmail', code)
-        await User.create({ login, password: await argon2.hash(password), fio, code, codeAt: new Date() })
+        await User.create({ login, password: await argon2.hash(password), code, codeAt: new Date() })
         res.json({ status: 'OK' });
 
     },

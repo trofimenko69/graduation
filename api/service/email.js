@@ -22,7 +22,7 @@ export default function (to, type, ...arg){
 
 
     const mail = {
-        from: { name: 'Practice Service', address },
+        from: { name: 'Service', address },
         to,
         subject: replacement.subject,
         generateTextFromHTML: true,

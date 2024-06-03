@@ -7,6 +7,6 @@ const router=new Router()
 
 
 router.route('/:workout/create')
-    .post(verify.combine(verify.general, verify.company),
+    .post(verify.company,
         asyncRoute(scheduleCtrl.appendWorkout))
 

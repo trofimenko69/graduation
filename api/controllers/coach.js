@@ -16,7 +16,7 @@ export default {
             directions,
             description,
             phone,
-            companyId: company.id
+            companyId: company.id,
         })
 
         res.json({status: 'Ok'})

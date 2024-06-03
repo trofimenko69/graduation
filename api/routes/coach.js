@@ -1,16 +1,19 @@
 import {asyncRoute} from "../utils/errors.js";
 import coachCtrl from "../controllers/coach.js";
 import verify from '../middlewares/verify-token.js';
-import router from "./company.js";
+import Router from "express";
+
+const router=new Router()
+
 
 router.route('/')
-    .post(verify.combine(verify.general, verify.company),
+    .post(verify.company,
         asyncRoute(coachCtrl.appendCoach))
 
 router.route('/:coachId')
-    .patch(	verify.combine(verify.general, verify.company),
+    .patch(verify.company,
         asyncRoute(coachCtrl.updateCoach))
-    .delete(verify.combine(verify.general, verify.company),
+    .delete(verify.company,
         asyncRoute(coachCtrl.destroyCoach))
 
 export default router

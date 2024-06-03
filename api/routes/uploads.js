@@ -5,10 +5,12 @@ import uploadsCtrl from '../controllers/uploads.js';
 import roles from '../config/roles.json' assert { type: "json" }
 const router = Router();
 
-router.use(asyncRoute(verify.general));
 
 router
     .route('/')
-    .post(verify.combine(verify.general,  verify.company,verify.user([roles.DEFAULT])), uploadsCtrl.uploader, asyncRoute(uploadsCtrl.afterUpload))
+    .post(verify.general, verify.combine(verify.company,asyncRoute(verify.user([roles.ADMIN_SYSTEM]))), uploadsCtrl.uploaderLogo, asyncRoute(uploadsCtrl.afterUploadLogo))
+
+router.route('/images')
+    .post(verify.company, uploadsCtrl.uploaderImages, asyncRoute(uploadsCtrl.afterUploadImages))
 
 export default router;

@@ -22,17 +22,17 @@ router.route('/self')
 
 router.route('/:companyId')
     .get(asyncRoute(companyCtrl.getById))
-    .patch(asyncRoute(companyCtrl.update))
-    .delete(asyncRoute(companyCtrl.destroy))
+    .patch(verify.company,asyncRoute(companyCtrl.update))
+    .delete(verify.general,asyncRoute(verify.user([roles.ADMIN_SYSTEM])),asyncRoute(companyCtrl.destroy))
 
 router.route('/:companyId/marks')
-    .post(asyncRoute(companyCtrl.createMark))
+    .post(verify.general,asyncRoute(verify.user([roles.DEFAULT, roles.ADMIN_SYSTEM])), asyncRoute(companyCtrl.createMark))
 
 router.route('/:companyId/schedule')
     .get(asyncRoute(companyCtrl.schedule))
 
 router.route('/:companyId/statistics')
-    .get(asyncRoute(companyCtrl.statistics))
+    .get(verify.general, verify.combine(verify.company,asyncRoute(verify.user([roles.ADMIN_SYSTEM]))) , asyncRoute(companyCtrl.statistics))
 
 
 
