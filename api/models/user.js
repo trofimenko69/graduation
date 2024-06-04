@@ -8,28 +8,23 @@ export default class User extends Model {
     User.init(
         {
     id: { type: DataTypes.UUID, primaryKey: true },
-
     login: {
         type: DataTypes.STRING,
         validate: {isEmail: {msg: 'Must be a valid email address'}},
         allowNull: false,
         unique: 'login',
     },
-    password: { type: DataTypes.STRING, allowNull: true },
-
+    password: { type: DataTypes.STRING, allowNull: false },
     isActivate: { type: DataTypes.BOOLEAN, defaultValue: false },
     fio: DataTypes.STRING,
     phone: DataTypes.STRING,
-
     role: {
         type: DataTypes.SMALLINT,
         allowNull: false,
         defaultValue: roles.DEFAULT,
         validate: { isIn: [Object.values(roles)] },
     },
-
     logo: DataTypes.BOOLEAN,
-
     date: DataTypes.DATE,
     code: DataTypes.STRING,
     codeAt: DataTypes.DATE,

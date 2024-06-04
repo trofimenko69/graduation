@@ -6,6 +6,9 @@ import {Router} from "express";
 
 const router=new Router()
 
+router.route('/')
+    .post(verify.company, asyncRoute(subCtrl.create))
+
 router.route('/design')
     .post(verify.general,asyncRoute(subCtrl.design))
 
@@ -15,5 +18,6 @@ router.route('/:subscriptionId/freeze')
 
 router.route('/:subscriptionId/defrost')
     .patch(verify.general,asyncRoute(subCtrl.defrost))
+
 
 export default router

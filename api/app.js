@@ -2,6 +2,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import cronService from './service/cron.js'
 import {initDbModels} from "./utils/db.js";
+import {initCache} from "./service/cache.js";
 import { AppError, MultipleError, SystemError } from './utils/errors.js';
 import { MulterError } from 'multer';
 
@@ -21,7 +22,7 @@ const app=express();
 
 (async function initDb(){
     try {
-       // await initCache();
+        await initCache();
         await initDbModels();
     } catch (e) {
         if (app.get('env') !== 'test') {

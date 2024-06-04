@@ -14,7 +14,8 @@ import Workout from "../models/workout.js";
 import jwt from "../utils/jwt.js";
 import User from "../models/user.js";
 import Agreement from "../models/agreement.js";
-
+import Subscription from "../models/subscription.js";
+import cache from "../service/cache.js";
 export default {
 
     async login({body: {login, password} },res){
@@ -180,6 +181,23 @@ export default {
         res.json({ status: 'OK' });
     },
 
+
+    async getPrices({ params: { companyId } }, res){
+        const priceListCache=await cache.get(companyId)
+
+        if(priceListCache) return res.json({price: priceListCache})
+
+        const priceList=await Subscription.findAll({
+                where: {
+                    companyId: companyId
+                }
+        })
+        if(priceList) await cache.set(companyId, JSON.stringify(priceList))
+
+        res.json({
+          price: priceList
+        })
+    },
 
     async createMark({ params: { companyId }, body: { mark, text }, user }, res) {
         if (!mark) throw new AppErrorMissing('mark');

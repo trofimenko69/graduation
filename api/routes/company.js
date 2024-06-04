@@ -25,6 +25,9 @@ router.route('/:companyId')
     .patch(verify.company,asyncRoute(companyCtrl.update))
     .delete(verify.general,asyncRoute(verify.user([roles.ADMIN_SYSTEM])),asyncRoute(companyCtrl.destroy))
 
+router.route('/:companyId/priceList')
+    .get(asyncRoute(companyCtrl.getPrices))
+
 router.route('/:companyId/marks')
     .post(verify.general,asyncRoute(verify.user([roles.DEFAULT, roles.ADMIN_SYSTEM])), asyncRoute(companyCtrl.createMark))
 

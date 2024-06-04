@@ -7,13 +7,13 @@ import Coach from "./coach.js";
 import Mark from "./mark.js";
 import History from './history.js'
 import Workout from "./workout.js";
-const { DB_USER, DB_PWD, DB_HOST, DB_PORT } = process.env;
+const { DB_NAME,DB_USER, DB_PWD, DB_HOST, DB_PORT } = process.env;
 
 export const models={
     User,Company, Subscription, Coach, Agreement, Mark, History, Workout
 };
 
-export const sequelize = new Sequelize(process.env.DB_NAME, DB_USER, DB_PWD, {
+export const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PWD, {
     host: DB_HOST,
     port: DB_PORT,
     dialect: 'postgres',
@@ -26,3 +26,5 @@ export const sequelize = new Sequelize(process.env.DB_NAME, DB_USER, DB_PWD, {
     },
     logging: false,
 });
+
+

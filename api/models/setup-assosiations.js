@@ -11,8 +11,8 @@ export default function (){
     Company.hasMany(Coach,{foreignKey: { name :'companyId', allowNull: true}, as: 'coaches'});
     Coach.belongsTo(Company,{foreignKey: { name :'companyId', allowNull: true}, as: 'companies'});
 
-    User.hasMany( Subscription, { foreignKey: {name: 'userId', allowNull: true}, as: 'subscriptions'});
-    Subscription.belongsTo(User, {foreignKey: {name: 'userId', allowNull: true}, as: 'user'});
+    Company.hasMany( Subscription, { foreignKey: {name: 'companyId', allowNull: true}, as: 'subscriptions'});
+    Subscription.belongsTo(Company, {foreignKey: {name: 'companyId', allowNull: true}, as: 'company'});
 
     Company.hasMany(Agreement, {foreignKey: {name: 'companyId', allowNull: true}, as: 'agreements'});
     Agreement.belongsTo(Company, {foreignKey: {name: 'companyId', allowNull: true}, as: 'company'});
