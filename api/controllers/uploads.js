@@ -29,6 +29,8 @@ const storageLogo = multer.diskStorage({
     },
 });
 
+const uploaderLogo = multer({ storageLogo, fileFilter, limits: { fileSize: 3145728 } }).single('file',  1);
+
 
 const storageImages = multer.diskStorage({
     destination: ({ company }, { originalname }, cb) => {
@@ -40,8 +42,7 @@ const storageImages = multer.diskStorage({
     },
 })
 
-const uploaderLogo = multer({ storageLogo, fileFilter, limits: { fileSize: 3145728 } }).single('file',  1);
-const uploaderImages = multer({ storageImages, fileFilter, limits: { fileSize: 3145728 } }).array('images', 10);
+const uploaderImages = multer({ storageImages, fileFilter, limits: { fileSize: 3145728 } }).any();
 
 
 export default {

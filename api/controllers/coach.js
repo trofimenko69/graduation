@@ -24,8 +24,8 @@ export default {
     },
 
     async updateCoach({
-                          params: {coachId},
-                          body: {fio, experience, directions, description, phone},
+                          params: { coachId },
+                          body: { fio, experience, directions, description, phone },
                            company
                       }, res) {
         if (!fio) throw new AppErrorMissing('fio')
@@ -46,7 +46,7 @@ export default {
     },
 
     async destroyCoach({params: {coachId}}, res) {
-        await Coach.destroy({where: {id: coachId}});
+        await Coach.destroy({where: { id: coachId }});
         res.json({status: 'OK'});
     },
 }

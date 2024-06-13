@@ -16,6 +16,7 @@ import User from "../models/user.js";
 import Agreement from "../models/agreement.js";
 import Subscription from "../models/subscription.js";
 import cache from "../service/cache.js";
+import validate from "validator";
 export default {
 
     async login({body: {login, password} },res){
@@ -35,7 +36,7 @@ export default {
             allowedFilters: {
                 coast: Number,
                 size: v => (Array.isArray(v) ? v.map(Number) : [Number(v)]),
-                area: v => (Array.isArray(v) ? v.map(Number) : [Number(v)]),
+                area: str => (Array.isArray(str) ? str : [str]),
                 address: str => (Array.isArray(str) ? str : [str]),
             },
         });
@@ -140,17 +141,20 @@ export default {
     },
 
 
-    async create({body: { login, name, description, address, area, size,  phone, inn, kpp }}, res){
+    async create({body: { login, name, description, address, logo,  area, size,  phone, inn, kpp }}, res){
 
-        if  (!login) throw new AppErrorMissing('login');
+        if(!login || !validate.isEmail(login)) throw new AppErrorInvalid('login')
         if  (!name) throw new AppErrorMissing('name')
         if  (!description) throw new AppErrorMissing('description')
         if  (!address) throw new AppErrorMissing('address')
         if  (!area) throw new AppErrorMissing('area')
         if  (!size) throw new AppErrorMissing('size')
+        if  (!logo) throw new AppErrorMissing('logo')
         if  (!phone) throw new AppErrorMissing('phone')
         if  (!inn) throw new AppErrorMissing('inn')
         if  (!kpp) throw new AppErrorMissing('kpp')
+
+
 
         const checkCompany = await Company.findOne({ where: { [Op.or]: { login, inn }}});
         if (checkCompany) throw new AppErrorAlreadyExists('company');
@@ -164,6 +168,7 @@ export default {
                 description,
                 address,
                 area,
+                logo,
                 size,
                 phone,
                 inn,
@@ -244,8 +249,6 @@ export default {
     },
 
     async statistics({params: { companyId }}, res ){
-
-
         const [{count, rows,coaches, users}]=await Promise.all([
             Mark.findAndCountAll({
                 where: {
@@ -273,7 +276,6 @@ export default {
                 },
             })
         ])
-
 
 
         const data = { marks: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }, diagram: {} };

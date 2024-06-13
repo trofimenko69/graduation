@@ -137,27 +137,6 @@ export class AppErrorForbiddenAction extends AppError {
     }
 }
 
-    export class MultipleError {
-    constructor(name, status, key) {
-        this.name = name;
-        this.status = status ?? 400;
-        this.key = key ?? 'MULTIPLE_APP_ERROR';
-        this.errors = [];
-    }
-
-    add(error) {
-        this.errors.push(error);
-    }
-    toJSON() {
-        return {
-            name: this.name,
-            status: this.status,
-            key: this.key,
-            errors: this.errors,
-        };
-    }
-}
-
 // error for developer
 export class SystemError extends Error {
     constructor(status, err) {

@@ -26,8 +26,10 @@ export default {
         if (!companyId) throw new AppErrorMissing('companyId');
 
         const company = await Company.findByPk(companyId)
+        const subscription = await Subscription.findByPk(companyId)
 
         if (!company) throw new AppErrorNotExist('company');
+        if (!subscription) throw new AppErrorNotExist('subscription');
 
         const agreement = await Agreement.create({
             subscriptionId: subscriptionId,
@@ -62,7 +64,7 @@ export default {
         if (agreement.status !== states.ACTIVE) throw new AppErrorInvalid('subscription')
 
         if (
-            (agreement.subscription.visitingTime === 'Безлимит'
+            (agreement.subscription.isUnlimited
                 && agreement.createdAt + agreement.subscription.countVisits > new Date()) || agreement.subscription.visitingTime > 0) {
             await agreement.update({states: states.BLOCKED})
         } else throw new AppErrorInvalid('subscription')
@@ -87,13 +89,13 @@ export default {
     },
 
 
-    async create({body: {countVisits, timeStart, timeEnd, coast, visitingTime, type}, company}, res) {
+    async create({body: {countVisits, timeStart, timeEnd, coast, isUnlimited, type}, company}, res) {
         const checkSubscription = await Subscription.findOne({
             where: {
                 countVisits,
                 timeStart,
                 timeEnd,
-                visitingTime,
+                isUnlimited,
                 type,
             }
         })
@@ -103,7 +105,7 @@ export default {
             timeStart,
             timeEnd,
             coast,
-            visitingTime,
+            isUnlimited,
             type,
         })
 
@@ -115,7 +117,7 @@ export default {
     async update(
      {
      params: {subscriptionId},
-     body: { countVisits, timeStart, timeEnd, coast, visitingTime, type },
+     body: { countVisits, timeStart, timeEnd, coast, isUnlimited, type },
      },
      res){
 
@@ -126,7 +128,7 @@ export default {
                 timeStart,
                 timeEnd,
                 coast,
-                visitingTime,
+                isUnlimited,
                 type
             }
         })
@@ -139,7 +141,7 @@ export default {
             timeStart,
             timeEnd,
             coast,
-            visitingTime,
+            isUnlimited,
             type
         })
 

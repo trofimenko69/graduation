@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser'
 import cronService from './service/cron.js'
 import {initDbModels} from "./utils/db.js";
 import {initCache} from "./service/cache.js";
-import { AppError, MultipleError, SystemError } from './utils/errors.js';
+import { AppError, SystemError } from './utils/errors.js';
 import { MulterError } from 'multer';
 
 import corsMiddleware from './middlewares/cors.js';
@@ -53,7 +53,7 @@ app
     .use((error, req, res, next) => {
         console.error(error);
 
-        if (error instanceof AppError || error instanceof SystemError || error instanceof MultipleError) {
+        if (error instanceof AppError || error instanceof SystemError) {
             res.status(error.status).json(error.toJSON());
         } else if (error instanceof MulterError && error.code === 'LIMIT_FILE_SIZE') {
             const error = new AppError(errorCodes.FileTooLarge);

@@ -7,7 +7,7 @@ export default class Workout extends Model {
                 id: { type: DataTypes.UUID, primaryKey: true },
                 date: { type: DataTypes.DATEONLY, allowNull: false },
                 time: { type: DataTypes.TIME, allowNull: false },
-                duration: { type: DataTypes.STRING, allowNull: false },
+                duration: { type: DataTypes.TIME, allowNull: false },
                 type: { type: DataTypes.STRING, allowNull: false},
                 leisurePlaces: { type: DataTypes.SMALLINT, allowNull: false, default: 15 },
 

@@ -26,7 +26,7 @@ export default class Company extends Model{
                 area: DataTypes.STRING,
                 size: DataTypes.SMALLINT,
 
-                phone: DataTypes.STRING,
+                phone: { type: DataTypes.STRING, allowNull: false },
                 inn: DataTypes.STRING,
                 kpp: DataTypes.STRING,
 

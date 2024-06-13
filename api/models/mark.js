@@ -7,8 +7,8 @@ export default class Mark extends Model {
             {
                 id: { type: DataTypes.UUID, primaryKey: true },
 
-                mark: DataTypes.INTEGER,
-                text: DataTypes.STRING,
+                mark: { type: DataTypes.SMALLINT, allowNullL: false },
+                text: {type: DataTypes.TEXT, allowNullL: false },
             },
             {
                 sequelize,

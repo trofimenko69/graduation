@@ -11,7 +11,7 @@ export default class Subscription extends Model {
                 timeStart: { type: DataTypes.TIME, allowNull: true },
                 timeEnd: {type: DataTypes.TIME, allowNull: true},
                 coast: { type: DataTypes.SMALLINT },
-                visitingTime: { type: DataTypes.STRING, allowNull: true },
+                isUnlimited: DataTypes.BOOLEAN,
                 type: {
                     type: DataTypes.SMALLINT,
                     allowNull: false,

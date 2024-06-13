@@ -5,21 +5,12 @@ import {v4 as uuidv4} from "uuid";
 export default class Coach extends Model{
     static initialize(sequelize){
         Coach.init({
-                id: {type: DataTypes.UUID, primaryKey: true},
-                /*login: {
-                    type: DataTypes.STRING,
-                    validate: {isEmail: {msg: 'Must be a valid email address'}},
-                    allowNull: false,
-                    unique: 'login',
-                },
-                password: { type: DataTypes.STRING, allowNull: true },*/
-
-                fio: DataTypes.STRING,
+                id: { type: DataTypes.UUID, primaryKey: true},
+                fio: { type: DataTypes.STRING, allowNull: false },
                 experience: { type: DataTypes.SMALLINT, allowNull: false },
                 directions: { type: DataTypes.TEXT, allowNull: false },
                 description: DataTypes.TEXT,
-                phone: DataTypes.STRING,
-
+                phone: { type: DataTypes.STRING, allowNull: false },
                 logo: DataTypes.BOOLEAN,
                 summary: DataTypes.BOOLEAN,
 

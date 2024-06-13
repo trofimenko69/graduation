@@ -10,7 +10,7 @@ const router=new Router()
 router.use(verify.general)
 
 
-router.route('/self').get(asyncRoute(verify.user([roles.DEFAULT, roles.ADMIN_SYSTEM])),asyncRoute(userCtrl.self))
+router.route('/self').get(asyncRoute(userCtrl.self))
 router.route('/').patch(asyncRoute(userCtrl.update))
 
 

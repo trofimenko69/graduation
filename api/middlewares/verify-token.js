@@ -4,7 +4,6 @@ import User from "../models/user.js";
 import Company from "../models/company.js";
 
 async function general(req, res, next) {
-    console.log(req.cookies['auth._token.user'])
     const authorization = req.cookies['auth._token.user'];
     if (authorization?.split(' ')[0] !== 'Bearer') throw new AppErrorInvalid('token', 401);
 

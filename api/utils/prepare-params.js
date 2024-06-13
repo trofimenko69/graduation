@@ -44,18 +44,14 @@ export default (
 
     if (allowedFilters) {
         filters = {};
-
         if (allowedFilters instanceof Array) {
-            // if allowedFilters is array of allowed param names
             for (const key of allowedFilters) {
                 if (rest[key] !== undefined) {
                     filters[key] = rest[key];
                 }
             }
         } else {
-            // if allowedFilters is an object where keys are allowed param names and values are the corresponding parser functions
-            const filterEntries = Object.entries(allowedFilters);
-
+          const filterEntries = Object.entries(allowedFilters);
             for (const [key, parser] of filterEntries) {
                 if (rest[key] !== undefined) {
                     filters[key] = parser ? parser(rest[key]) : rest[key];
@@ -75,3 +71,4 @@ export default (
 
     return { page, limit, search, sort: sortRules, filters };
 };
+
