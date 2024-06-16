@@ -8,7 +8,7 @@ const router = Router();
 
 router
     .route('/')
-    .post(verify.general, verify.combine(verify.company,asyncRoute(verify.user([roles.ADMIN_SYSTEM]))), uploadsCtrl.uploaderLogo, asyncRoute(uploadsCtrl.afterUploadLogo))
+    .post(verify.general, verify.company, uploadsCtrl.uploaderLogo, asyncRoute(uploadsCtrl.afterUploadLogo))
 
 router.route('/images')
     .post(verify.company, uploadsCtrl.uploaderImages, asyncRoute(uploadsCtrl.afterUploadImages))

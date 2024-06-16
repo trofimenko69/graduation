@@ -79,7 +79,7 @@ export default {
                 companyId: company.id
             }
         });
-        res.json({company: prepareCompany(company)})
+        res.json({company: prepareCompany(company), coaches: company.coaches})
     },
 
 
@@ -141,7 +141,7 @@ export default {
     },
 
 
-    async create({body: { login, name, description, address, logo,  area, size,  phone, inn, kpp }}, res){
+    async create({body: { login, name, description, address, area, size,  phone, inn, kpp }}, res){
 
         if(!login || !validate.isEmail(login)) throw new AppErrorInvalid('login')
         if  (!name) throw new AppErrorMissing('name')
@@ -149,7 +149,6 @@ export default {
         if  (!address) throw new AppErrorMissing('address')
         if  (!area) throw new AppErrorMissing('area')
         if  (!size) throw new AppErrorMissing('size')
-        if  (!logo) throw new AppErrorMissing('logo')
         if  (!phone) throw new AppErrorMissing('phone')
         if  (!inn) throw new AppErrorMissing('inn')
         if  (!kpp) throw new AppErrorMissing('kpp')
@@ -168,7 +167,6 @@ export default {
                 description,
                 address,
                 area,
-                logo,
                 size,
                 phone,
                 inn,
@@ -190,7 +188,7 @@ export default {
     async getPrices({ params: { companyId } }, res){
         const priceListCache=await cache.get(companyId)
 
-        if(priceListCache) return res.json({price: priceListCache})
+        if(priceListCache) return res.json({ price: priceListCache })
 
         const priceList=await Subscription.findAll({
                 where: {

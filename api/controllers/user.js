@@ -2,17 +2,23 @@ import {AppErrorForbiddenAction, AppErrorInvalid, AppErrorMissing, AppErrorNotEx
 import Subscription from "../models/subscription.js";
 import Agreement from "../models/agreement.js";
 import User from "../models/user.js";
+import states from "../config/states.json" assert { type: "json" };
 
 
 export default {
     async self({  user }, res){
-        user.subscription=await Subscription.findAll({
-            where: { userId: user.id,  isActive: true }
+        user.subscription=await Agreement.findAll({
+            where: { userId: user.id },
+            include: {
+                model: Subscription,
+                as: 'subscription',
+                required: true,
+            }
         })
 
         res.json({
             user: user,
-            subscriptions: user.subscription.map(s=>s)
+            agreements: user.subscription.map(s=>s)
         })
     },
 

@@ -11,29 +11,39 @@ import cache from "../service/cache.js";
 import Company from "../models/company.js";
 import History from "../models/history.js";
 import states from "../config/states.json" assert { type: "json" };
+import types from "../config/types.json" assert { type: "json" };
 
 export default {
     async design({
                      body: {
                          subscriptionId,
-                         companyId,
                          coachId
                      }, user
                  }, res) {
 
 
         if (!subscriptionId) throw new AppErrorMissing('subscriptionId')
-        if (!companyId) throw new AppErrorMissing('companyId');
 
-        const company = await Company.findByPk(companyId)
-        const subscription = await Subscription.findByPk(companyId)
 
-        if (!company) throw new AppErrorNotExist('company');
+        const subscription = await Subscription.findByPk(subscriptionId)
         if (!subscription) throw new AppErrorNotExist('subscription');
-
-        const agreement = await Agreement.create({
+        const agreement= await Agreement.findOne({
+            where: {
+                subscriptionId: subscription.id
+            }
+        })
+        if(agreement) throw new AppErrorAlreadyExists('agreement')
+        if(subscription.type===types.GROUP && coachId===null) throw new AppErrorInvalid('subscription')
+        const company = await Company.findOne({
+            where: {
+                id: subscription.companyId
+            }
+        })
+        if(!company) throw new AppErrorNotExist('company')
+        await Agreement.create({
             subscriptionId: subscriptionId,
-            companyId: companyId,
+            companyId: company.id,
+            userId: user.id,
             coachId: coachId ?? null,
         })
 
@@ -44,7 +54,7 @@ export default {
         })
 
 
-        res.json({agreement})
+        res.json({status: 'Ok'})
     },
 
     async freeze({params: {subscriptionId}, user}, res) {
@@ -89,27 +99,36 @@ export default {
     },
 
 
-    async create({body: {countVisits, timeStart, timeEnd, coast, isUnlimited, type}, company}, res) {
+    async create({body: { countVisits, timeStart, timeEnd, coast, isUnlimited, type }, company}, res) {
+
+        if(!countVisits) throw  new AppErrorMissing('countVisits')
+        if(!coast) throw new AppErrorMissing('coast')
+        if(!isUnlimited) throw new AppErrorMissing('isUnlimited')
+
         const checkSubscription = await Subscription.findOne({
             where: {
-                countVisits,
-                timeStart,
-                timeEnd,
-                isUnlimited,
-                type,
+                 countVisits,
+                 timeStart: timeStart ?? null,
+                 timeEnd: timeEnd ?? null,
+                 isUnlimited,
+                 coast,
+                 type: type ?? types.ORDINARY,
+                 companyId: company.id,
             }
         })
+
         if (checkSubscription) throw new AppErrorAlreadyExists('subscription')
         const subscription = await Subscription.create({
             countVisits,
-            timeStart,
-            timeEnd,
-            coast,
+            timeStart: timeStart ?? null,
+            timeEnd: timeEnd ?? null,
             isUnlimited,
-            type,
-        })
+            coast,
+            type: type ?? types.ORDINARY,
+            companyId: company.id,
+        })*
 
-        await cache.set(company.id, null)
+        await cache.del(company.id)
 
         res.json(subscription)
     },
@@ -117,19 +136,24 @@ export default {
     async update(
      {
      params: {subscriptionId},
-     body: { countVisits, timeStart, timeEnd, coast, isUnlimited, type },
+     body: { countVisits, timeStart, timeEnd, coast, isUnlimited, type }, company,
      },
      res){
 
+        if(!countVisits) throw  new AppErrorMissing('countVisits')
+        if(!coast) throw new AppErrorMissing('coast')
+        if(!isUnlimited) throw new AppErrorMissing('isUnlimited')
+
         const subscription=await Subscription.findByPk(subscriptionId)
-        const checkSubscription =await Subscription.findOne({
+        const checkSubscription = await Subscription.findOne({
             where: {
                 countVisits,
-                timeStart,
-                timeEnd,
-                coast,
+                timeStart: timeStart ?? null,
+                timeEnd: timeEnd ?? null,
                 isUnlimited,
-                type
+                coast,
+                type: type ?? types.ORDINARY,
+                companyId: company.id,
             }
         })
 
@@ -145,17 +169,8 @@ export default {
             type
         })
 
-        const companyId= await Company.findAll({
-            where: {
-                subscriptionId: subscription.id,
-            },
-            attributes: ['id'],
-        })
+        await cache.del(company.id)
 
-        if(companyId) throw new AppErrorNotExist('companyId')
-
-        await cache.set(companyId, null)
-
-        res.json({states: 'Ok'})
+        res.json({ states: 'Ok' })
     }
 }

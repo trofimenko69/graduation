@@ -4,6 +4,7 @@ import { AppError, AppErrorMissing } from '../utils/errors.js';
 import errorCodes from '../config/errorCodes.json' assert { type: "json" }
 
 import fs from 'fs';
+import User from "../models/user.js";
 
 const acceptedTypes = /jpeg|jpg|png|pdf/;
 
@@ -18,9 +19,11 @@ const fileFilter = (req, { originalname }, cb) => {
 
 const storageLogo = multer.diskStorage({
     destination: ({user, company, }, { originalname }, cb) => {
-        const extension = path.extname(originalname).toLowerCase();
-         if(user) cb(null, `./uploads/users/`);
-         else cb(`./uploads/company/logo`)
+         if(user) {
+             console.log(1)
+             cb(null, `./uploads/users/`);
+         }
+         else cb(null, `./uploads/company/logo`)
     },
     filename: ({ user, company }, { originalname }, cb) => {
         const extension = path.extname(originalname).toLowerCase();
@@ -34,7 +37,7 @@ const uploaderLogo = multer({ storageLogo, fileFilter, limits: { fileSize: 31457
 
 const storageImages = multer.diskStorage({
     destination: ({ company }, { originalname }, cb) => {
-        if(company) cb(`./uploads/company/images`)
+        if(company) cb(null, `./uploads/company/images`)
     },
     filename: ({ user, company }, { originalname }, cb) => {
         const extension = path.extname(originalname).toLowerCase();
@@ -49,10 +52,10 @@ export default {
     uploaderLogo,
     uploaderImages,
 
-    async afterUploadLogo({ file, user, company, }, res) {
+    async afterUploadLogo({ file, user, company }, res) {
 
         if (!file) throw new AppErrorMissing('file');
-        if(user) await user.update( { logo: true } );
+        if(user) await User.update( { logo: true },{where: {id : user.id}} );
         else await company.update({ logo: true} )
 
         res.json({ status: 'OK' });

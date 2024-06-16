@@ -7,11 +7,11 @@ export default class Subscription extends Model {
         Subscription.init({
 
                 id: {type: DataTypes.UUID, primaryKey: true},
-                countVisits: {type : DataTypes.SMALLINT, allowNull: true},
+                countVisits: {type : DataTypes.SMALLINT, allowNull: false},
                 timeStart: { type: DataTypes.TIME, allowNull: true },
                 timeEnd: {type: DataTypes.TIME, allowNull: true},
-                coast: { type: DataTypes.SMALLINT },
-                isUnlimited: DataTypes.BOOLEAN,
+                coast: { type: DataTypes.SMALLINT, allowNull: false },
+                isUnlimited: { type: DataTypes.BOOLEAN, allowNull: true },
                 type: {
                     type: DataTypes.SMALLINT,
                     allowNull: false,

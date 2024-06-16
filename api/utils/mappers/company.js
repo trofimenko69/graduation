@@ -17,8 +17,7 @@ export function map(user, studentId) {
 
         name: user.name,
         description: user.description,
-        logo: user.logo ? cdnUrl('company', user.id) : null,
-
+        logo: user.logo ? cdnUrl('company', 'logo', user.id) : null,
         phone: user.phone,
         address: user.address,
         area: user.area,

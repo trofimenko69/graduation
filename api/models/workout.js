@@ -16,6 +16,7 @@ export default class Workout extends Model {
                     sequelize,
                     modelName: 'Workout',
                     tableName: 'workouts',
+                    timezone : "+03:00"
                 })
             Workout.beforeCreate(w=>{
                 w.id=uuidv4();
