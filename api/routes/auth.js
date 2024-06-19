@@ -11,6 +11,6 @@ router.route('/registration').patch(asyncRoute(authCtrl.checkEmail)).post(asyncR
 
 router.route('/login').post(asyncRoute(authCtrl.login));
 
-router.route('/reset').post(asyncRoute(authCtrl.checkEmail)).patch(asyncRoute(authCtrl.resetPassword));
+router.route('/reset').post(asyncRoute(authCtrl.checkCode)).patch(asyncRoute(authCtrl.resetPassword));
 
 export default router;

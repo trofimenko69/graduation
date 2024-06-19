@@ -17,5 +17,13 @@ export default {
         subject: 'subscription expires',
         template: (company)=>
         `<p>Здравствуйте, ваш обонемент в "${company}" скоро закончится.</p>`
+    },
+
+    resetPassword: {
+        subject:'reset code',
+        template: code=> `<h1>
+            Здравствуйте, для восстановления пароля введите полученный код.
+            <p>${code}</p>
+        </h1>`
     }
 }

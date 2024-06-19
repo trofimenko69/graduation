@@ -31,10 +31,9 @@ export default {
     async get({ query, user }, res){
         const {
             search,
-            filters: { coast, size, area, address },
+            filters: {  size, area, address },
         } = prepareParams(query, {
             allowedFilters: {
-                coast: Number,
                 size: v => (Array.isArray(v) ? v.map(Number) : [Number(v)]),
                 area: str => (Array.isArray(str) ? str : [str]),
                 address: str => (Array.isArray(str) ? str : [str]),
@@ -48,7 +47,6 @@ export default {
                     [Op.or]: [{ name: { [Op.iLike]: `%${search}%` } }, { name: { [Op.iLike]: `%${search}%` } }],
                 },
             }),
-           ...(coast && { where: { [Op.between]: [0, coast]} }),
            ...(size && { where : { size:  { [Op.gte]: size }}}),
            ...(area && { where: { area: area }}),
            ...(address && {where: { address: {[Op.iLike]: `%${address}%`} }})
@@ -58,16 +56,18 @@ export default {
 
         const filtersSize = []
         const filtersArea = []
+        const filtersAddress = []
 
         filtersSize.push(...[...new Set(companies.map(c=>c.size))].filter(Boolean))
         filtersArea.push(...[...new Set(companies.map(c=>c.area))].filter(Boolean))
+        filtersAddress.push(...[...new Set(companies.map(c=>c.address))].filter(Boolean))
 
         res.json({
             companies: companies,
             filters:{
                 size: filtersSize,
                 area: filtersArea,
-                coast:coast
+                address: filtersAddress,
             },
             coaches: coaches,
         })
@@ -247,7 +247,7 @@ export default {
     },
 
     async statistics({params: { companyId }}, res ){
-        const [{count, rows,coaches, users}]=await Promise.all([
+        const [{count, rows},coaches, users]=await Promise.all([
             Mark.findAndCountAll({
                 where: {
                     companyId: companyId,
@@ -274,7 +274,6 @@ export default {
                 },
             })
         ])
-
 
         const data = { marks: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }, diagram: {} };
         for (const c of rows) data.marks[c.mark]++;

@@ -126,7 +126,7 @@ export default {
             coast,
             type: type ?? types.ORDINARY,
             companyId: company.id,
-        })*
+        })
 
         await cache.del(company.id)
 

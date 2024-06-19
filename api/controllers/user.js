@@ -1,24 +1,28 @@
-import {AppErrorForbiddenAction, AppErrorInvalid, AppErrorMissing, AppErrorNotExist} from "../utils/errors.js";
+import {AppErrorInvalid, AppErrorMissing} from "../utils/errors.js";
 import Subscription from "../models/subscription.js";
 import Agreement from "../models/agreement.js";
 import User from "../models/user.js";
-import states from "../config/states.json" assert { type: "json" };
+import History from "../models/history.js";
 
 
 export default {
     async self({  user }, res){
-        user.subscription=await Agreement.findAll({
-            where: { userId: user.id },
+        user=await User.findByPk(user.id)
+       const [subscription, history]=  await Promise.all([
+               Agreement.findAll({ where: { userId: user.id },
             include: {
                 model: Subscription,
                 as: 'subscription',
                 required: true,
             }
-        })
+        }),
+           History.findAll({where: { userId: user.id } }
+           )])
 
         res.json({
             user: user,
-            agreements: user.subscription.map(s=>s)
+            agreements: subscription.map(s=>s),
+            history: history,
         })
     },
 

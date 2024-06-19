@@ -9,9 +9,8 @@ export default user => ({
 
 });
 
-// формирует объект с описанием компании без информации о руководителе, для ответа
 
-export function map(user, studentId) {
+export function map(user) {
     return {
         id: user.id,
 

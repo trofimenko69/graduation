@@ -3,13 +3,12 @@ import multer from 'multer';
 import { AppError, AppErrorMissing } from '../utils/errors.js';
 import errorCodes from '../config/errorCodes.json' assert { type: "json" }
 
-import fs from 'fs';
 import User from "../models/user.js";
 
 const acceptedTypes = /jpeg|jpg|png|pdf/;
 
 
-// Проверка расширения файла
+
 const fileFilter = (req, { originalname }, cb) => {
     const extension = path.extname(originalname).toLowerCase();
     if (acceptedTypes.test(extension)) cb(null, true);
@@ -20,8 +19,7 @@ const fileFilter = (req, { originalname }, cb) => {
 const storageLogo = multer.diskStorage({
     destination: ({user, company, }, { originalname }, cb) => {
          if(user) {
-             console.log(1)
-             cb(null, `./uploads/users/`);
+             cb(null, `/uploads/users/`);
          }
          else cb(null, `./uploads/company/logo`)
     },
@@ -73,11 +71,6 @@ export default {
         })
         res.json({info: infoAboutImages.map(m=>m)})
     },
-    async delete({ user }, res) {
-        fs.unlink(`./uploads/summary/${user.id}.pdf`, () => {});
 
-        await user.update({ summary: false });
-        res.json({ status: 'OK' });
-    },
 
 };

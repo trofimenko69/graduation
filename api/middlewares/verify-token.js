@@ -28,21 +28,17 @@ function verifyUser(roles){
 }
 async function verifyCompany(req,res,next){
     const authorization = req.cookies['auth._token.company'];
-    // проверка наличие токена
     if (authorization?.split(' ')[0] !== 'Bearer') throw new AppErrorInvalid('token', 401);
 
-    // проверка токена на валидность
     try {
         req.user = jwt.verify(authorization.split(' ')[1]);
     } catch (e) {
         console.log(e);
         throw new AppErrorInvalid('token', 401);
     }
-    // получение компании по id из запроса
     const company = await Company.findByPk(req.user.id);
     if (!company) throw new AppErrorInvalid('token', 401);
 
-    // добавление компании в запрос и прокидывание запроса дальше
     req.company = company;
     next();
 }
